@@ -45,7 +45,6 @@
   "dependencies": {
     "async": "^1.5.2",
     "aws-event-parser": "^1.0.0",
-    "aws-sdk-promise": "0.0.2",
     "axios": "^0.15.2",
     "babyparse": "^0.4.6",
     "base64-url": "^1.2.2",
