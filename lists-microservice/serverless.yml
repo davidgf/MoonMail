@@ -44,7 +44,45 @@ custom:
   serverless-offline:
     babelOptions:
       presets: ["es2015"]
-  
+  documentation:
+    api:
+      info:
+        version: '2'
+        title: MoonMail API
+        description: >
+          Welcome to the MoonMail API reference. All requests are authenticated using an
+          `api-key` which can be obtained from your developer dashboard.
+        termsOfService: http://support.moonmail.io/terms-and-policies/terms-of-service
+        contact:
+          name: MoonMail
+          url: https://moonmail.io/
+          email: hi@moonmail.io
+      tags:
+        -
+          name: Recipients
+          description: Email recipients
+    models:
+      -
+        name: CreateOrderRequest
+        description: Model for creating a recipient
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+            metadata:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John
+                surname:
+                  type: string
+                  example: Doe
+              additionalProperties:
+                type: string
+
 
 package:
   individually: true
@@ -66,11 +104,11 @@ functions:
           type: kinesis
           batchSize: 100
           startingPosition: TRIM_HORIZON
-          arn: 
+          arn:
             Fn::GetAtt:
               - ListEventStream
               - Arn
-  
+
   createRecipient:
     handler: src/ApiHandler.createRecipient
     name: ${self:custom.resourcesPrefix}-createRecipient
@@ -81,8 +119,23 @@ functions:
           private: true
           request:
             parameters:
-              paths: 
+              paths:
                 listId: true
+          documentation:
+            summary: Creates a recipient
+            tags:
+              - Recipients
+            description: >
+              Creates a recipient within the specified list.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
+            requestModels:
+              "application/json": CreateOrderRequest
+            requestBody:
+              description: Recipient create request body
 
   updateRecipient:
     handler: src/ApiHandler.updateRecipient
@@ -94,7 +147,7 @@ functions:
           private: true
           request:
             parameters:
-              paths: 
+              paths:
                 listId: true
                 recipientId: true
 
@@ -108,9 +161,23 @@ functions:
           private: true
           request:
             parameters:
-              paths: 
+              paths:
                 listId: true
                 recipientId: true
+          documentation:
+            summary: Deletes a recipient
+            tags:
+              - Recipients
+            description: >
+              Gets a single recipient of the specified list.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
+              -
+                name: recipientId
+                description: The ID of the recipient
 
   getRecipient:
     handler: src/ApiHandler.getRecipient
@@ -122,9 +189,23 @@ functions:
           private: true
           request:
             parameters:
-              paths: 
+              paths:
                 listId: true
-                recipientId: true 
+                recipientId: true
+          documentation:
+            summary: Gets a recipient
+            tags:
+              - Recipients
+            description: >
+              Gets a single recipient of the specified list.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
+              -
+                name: recipientId
+                description: The ID of the recipient
 
   listRecipients:
     handler: src/ApiHandler.listRecipients
@@ -136,12 +217,12 @@ functions:
           private: true
           request:
             parameters:
-              paths: 
+              paths:
                 listId: true
               querystring:
                 size: true
                 from: true
-                
+
 
 resources:
   Resources:
