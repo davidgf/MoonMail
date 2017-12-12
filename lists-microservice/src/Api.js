@@ -56,16 +56,17 @@ async function listRecipients(event, context, callback) {
     App.configureLogger(event, context);
     App.logger().info('listRecipients', JSON.stringify(event));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const options = { from: event.queryStringParameters.from, size: event.queryStringParameters.from };
+    const qs = event.queryStringParameters || {}
+    const options = { from: qs.from, size: qs.from };
     // FIXME: Improve according to:
     // https://bitbucket.org/micro-apps/monei-core-serverless/src/38856c21a98cacc775cf0518e0d2bd8f488b45e9/node/users/lib/index.js?at=master&fileviewer=file-view-default
-    const conditions = event.queryStringParameters.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status', searchTerm: event.queryStringParameters.status }, conditionType: 'filter' }] : [];
-    // const conditions = event.queryStringParameters.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status.keyword', searchTerm: event.queryStringParameters.status }, conditionType: 'filter' }] : [];
-    // const conditions = event.queryStringParameters.status ? [{ condition: { queryType: 'terms', fieldToQuery: 'status.keyword', searchTerm: [event.queryStringParameters.status] }, conditionType: 'filter' }] : [];
+    const conditions = qs.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status', searchTerm: qs.status }, conditionType: 'filter' }] : [];
+    // const conditions = qs.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status.keyword', searchTerm: qs.status }, conditionType: 'filter' }] : [];
+    // const conditions = qs.status ? [{ condition: { queryType: 'terms', fieldToQuery: 'status.keyword', searchTerm: [qs.status] }, conditionType: 'filter' }] : [];
     const recipients = await Recipients.searchRecipientsByListAndConditions(event.pathParameters.listId, conditions, omitEmpty(options));
     HttpUtils.buildApiResponse({ statusCode: 200, body: recipients }, callback);
   } catch (error) {
-    App.logger().error(error);
+    App.logger().error(error, error.stack);
     HttpUtils.apiErrorHandler(error, callback);
   }
 }
@@ -74,12 +75,13 @@ async function getRecipient(event, context, callback) {
   try {
     App.configureLogger(event, context);
     App.logger().info('getRecipient', JSON.stringify(event));
+    App.logger().info('getRecipient', JSON.stringify(event.pathParameters));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
     // TODO: Handle 404?
-    const recipient = await Recipients.getRecipient({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId });
+    const recipient = await Recipients.getRecipient({ listId: event.pathParameters.listId, recipientId: event.pathParameters.recipientId });
     HttpUtils.buildApiResponse({ statusCode: 200, body: recipient }, callback);
   } catch (error) {
-    App.logger().error(error);
+    App.logger().error(error, error.stack);
     HttpUtils.apiErrorHandler(error, callback);
   }
 }

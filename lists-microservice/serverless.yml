@@ -12,6 +12,7 @@ provider:
   region: ${file(./config.${self:custom.currentStage}.json):REGION}
   timeout: 300
   environment:
+    SERVERLESS_REGION: ${file(./config.${self:custom.currentStage}.json):REGION} 
     LOG_LEVEL: ${file(./config.${self:custom.currentStage}.json):LOG_LEVEL}
     LISTS_TABLE: ${file(./config.${self:custom.currentStage}.json):LISTS_TABLE}
     RECIPIENTS_TABLE: ${file(./config.${self:custom.currentStage}.json):RECIPIENTS_TABLE}
@@ -20,6 +21,8 @@ provider:
     LIST_RECIPIENT_STREAM_NAME: ListEventStream
     IOT_ENDPOINT: ${file(./config.${self:custom.currentStage}.json):IOT_ENDPOINT}
     GET_USER_CONTEXT_FUNCTION: ${file(./config.${self:custom.currentStage}.json):GET_USER_CONTEXT_FUNCTION}
+    ES_RECIPIENTS_INDEX_NAME: ${file(./config.${self:custom.currentStage}.json):ES_RECIPIENTS_INDEX_NAME}
+    ES_RECIPIENTS_INDEX_TYPE: ${file(./config.${self:custom.currentStage}.json):ES_RECIPIENTS_INDEX_TYPE}
     #DEBUG: true
 
   iamRoleStatements:
@@ -78,7 +81,6 @@ custom:
                   type: string
                 surname:
                   type: string
-
 
 package:
   individually: true
