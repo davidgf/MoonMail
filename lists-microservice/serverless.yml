@@ -63,8 +63,8 @@ custom:
           description: Email recipients
     models:
       -
-        name: CreateOrderRequest
-        description: Model for creating a recipient
+        name: Recipient
+        description: Recipient's model
         contentType: "application/json"
         schema:
           type: object
@@ -76,12 +76,8 @@ custom:
               properties:
                 name:
                   type: string
-                  example: John
                 surname:
                   type: string
-                  example: Doe
-              additionalProperties:
-                type: string
 
 
 package:
@@ -101,7 +97,6 @@ functions:
             Fn::GetAtt:
               - ListEventStream
               - Arn
-<<<<<<< HEAD
   
   recipientCreatedEventHandler:
     handler: src/RecipientEventProcessorsHandler.recipientCreatedProcessor
@@ -151,9 +146,6 @@ functions:
           event: s3:ObjectCreated:*
 
   # Public API
-=======
-
->>>>>>> WIP
   createRecipient:
     handler: src/ApiHandler.createRecipient
     name: ${self:custom.resourcesPrefix}-createRecipient
@@ -178,7 +170,7 @@ functions:
                 description: The ID of the list the recipient belongs to
                 required: true
             requestModels:
-              "application/json": CreateOrderRequest
+              "application/json": Recipient
             requestBody:
               description: Recipient create request body
 
@@ -195,6 +187,24 @@ functions:
               paths:
                 listId: true
                 recipientId: true
+          documentation:
+            summary: Updates a recipient
+            tags:
+              - Recipients
+            description: >
+              Updates the specified recipient.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
+              -
+                name: recipientId
+                description: The ID of the recipient
+            requestModels:
+              "application/json": Recipient
+            requestBody:
+              description: Recipient update request body
 
   deleteRecipient:
     handler: src/ApiHandler.deleteRecipient
@@ -267,12 +277,18 @@ functions:
               querystring:
                 size: true
                 from: true
-<<<<<<< HEAD
                 status: true
-                
-=======
-
->>>>>>> WIP
+          documentation:
+            summary: Gets a list of recipients
+            tags:
+              - Recipients
+            description: >
+              Gets a set recipients of the specified list.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
 
 resources:
   Resources:
