@@ -12,6 +12,7 @@ provider:
   region: ${file(./config.${self:custom.currentStage}.json):REGION}
   timeout: 300
   environment:
+    SERVERLESS_REGION: ${file(./config.${self:custom.currentStage}.json):REGION}
     LOG_LEVEL: ${file(./config.${self:custom.currentStage}.json):LOG_LEVEL}
     LISTS_TABLE: ${file(./config.${self:custom.currentStage}.json):LISTS_TABLE}
     RECIPIENTS_TABLE: ${file(./config.${self:custom.currentStage}.json):RECIPIENTS_TABLE}
@@ -20,6 +21,8 @@ provider:
     LIST_RECIPIENT_STREAM_NAME: ListEventStream
     IOT_ENDPOINT: ${file(./config.${self:custom.currentStage}.json):IOT_ENDPOINT}
     GET_USER_CONTEXT_FUNCTION: ${file(./config.${self:custom.currentStage}.json):GET_USER_CONTEXT_FUNCTION}
+    ES_RECIPIENTS_INDEX_NAME: ${file(./config.${self:custom.currentStage}.json):ES_RECIPIENTS_INDEX_NAME}
+    ES_RECIPIENTS_INDEX_TYPE: ${file(./config.${self:custom.currentStage}.json):ES_RECIPIENTS_INDEX_TYPE}
     #DEBUG: true
 
   iamRoleStatements:
@@ -63,8 +66,8 @@ custom:
           description: Email recipients
     models:
       -
-        name: CreateOrderRequest
-        description: Model for creating a recipient
+        name: Recipient
+        description: Recipient's model
         contentType: "application/json"
         schema:
           type: object
@@ -76,28 +79,16 @@ custom:
               properties:
                 name:
                   type: string
-                  example: John
                 surname:
                   type: string
-                  example: Doe
-              additionalProperties:
-                type: string
-
 
 package:
   individually: true
 
 functions:
-  importRecipients:
-    handler: src/RecipientCommandsHandler.importRecipientsCsvFromS3
-    name: ${self:custom.resourcesPrefix}-importRecipients
-    events:
-      - s3:
-          bucket: ${self:custom.recipientsBucket}
-          event: s3:ObjectCreated:*
-
+  # Event handlers
   recipientImportedEventHandler:
-    handler: src/RecipientEventProcessorsHandler.recipientImportedHandler
+    handler: src/RecipientEventProcessorsHandler.recipientImportedProcessor
     name: ${self:custom.resourcesPrefix}-recipientImportedEventHandler
     events:
       - stream:
@@ -109,6 +100,54 @@ functions:
               - ListEventStream
               - Arn
 
+  recipientCreatedEventHandler:
+    handler: src/RecipientEventProcessorsHandler.recipientCreatedProcessor
+    name: ${self:custom.resourcesPrefix}-recipientCreatedEventHandler
+    events:
+      - stream:
+          type: kinesis
+          batchSize: 100
+          startingPosition: TRIM_HORIZON
+          arn:
+            Fn::GetAtt:
+              - ListEventStream
+              - Arn
+
+  recipientUpdatedEventHandler:
+    handler: src/RecipientEventProcessorsHandler.recipientUpdatedProcessor
+    name: ${self:custom.resourcesPrefix}-recipientUpdatedEventHandler
+    events:
+      - stream:
+          type: kinesis
+          batchSize: 100
+          startingPosition: TRIM_HORIZON
+          arn:
+            Fn::GetAtt:
+              - ListEventStream
+              - Arn
+
+  recipientDeletedEventHandler:
+    handler: src/RecipientEventProcessorsHandler.recipientDeletedProcessor
+    name: ${self:custom.resourcesPrefix}-recipientDeletedEventHandler
+    events:
+      - stream:
+          type: kinesis
+          batchSize: 100
+          startingPosition: TRIM_HORIZON
+          arn:
+            Fn::GetAtt:
+              - ListEventStream
+              - Arn
+
+  importRecipients:
+    handler: src/RecipientCommandsHandler.importRecipientsCsvFromS3
+    name: ${self:custom.resourcesPrefix}-importRecipients
+    events:
+      - s3:
+          bucket: ${self:custom.recipientsBucket}
+          event: s3:ObjectCreated:*
+
+  # Public API
   createRecipient:
     handler: src/ApiHandler.createRecipient
     name: ${self:custom.resourcesPrefix}-createRecipient
@@ -133,7 +172,7 @@ functions:
                 description: The ID of the list the recipient belongs to
                 required: true
             requestModels:
-              "application/json": CreateOrderRequest
+              "application/json": Recipient
             requestBody:
               description: Recipient create request body
 
@@ -150,6 +189,24 @@ functions:
               paths:
                 listId: true
                 recipientId: true
+          documentation:
+            summary: Updates a recipient
+            tags:
+              - Recipients
+            description: >
+              Updates the specified recipient.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
+              -
+                name: recipientId
+                description: The ID of the recipient
+            requestModels:
+              "application/json": Recipient
+            requestBody:
+              description: Recipient update request body
 
   deleteRecipient:
     handler: src/ApiHandler.deleteRecipient
@@ -222,7 +279,18 @@ functions:
               querystring:
                 size: true
                 from: true
-
+                status: true
+          documentation:
+            summary: Gets a list of recipients
+            tags:
+              - Recipients
+            description: >
+              Gets a set recipients of the specified list.
+            pathParams:
+              -
+                name: listId
+                description: The ID of the list the recipient belongs to
+                required: true
 
 resources:
   Resources:

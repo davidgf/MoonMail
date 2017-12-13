@@ -13,11 +13,9 @@ async function createRecipient(event, context, callback) {
     App.logger().info('createRecipient', JSON.stringify(event));
     const { recipient } = JSON.parse(event.body);
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const recipientCreatedEvent = Events.buildRecipientCreatedEvent({ listId: event.pathParameters.listId, userId: user.id, recipient });
-    console.log('HERE 1', JSON.stringify(recipientCreatedEvent));
+    const recipientCreatedEvent = await Events.buildRecipientCreatedEvent({ listId: event.pathParameters.listId, userId: user.id, recipient });
     await EventLog.write({ topic: Events.listRecipientCreated, streamName: process.env.LIST_RECIPIENT_STREAM_NAME, payload: recipientCreatedEvent });
-    console.log('HERE 2');
-    HttpUtils.buildApiResponse({ statusCode: 202, body: { id: RecipientModel.buildId(recipient) } }, callback);
+    HttpUtils.buildApiResponse({ statusCode: 202, body: {}, headers: { Location: `/lists/${event.pathParameters.listId}/recipients/${RecipientModel.buildId(recipient)}` } }, callback);
   } catch (error) {
     App.logger().error(error);
     HttpUtils.apiErrorHandler(error, callback);
@@ -30,9 +28,9 @@ async function updateRecipient(event, context, callback) {
     App.logger().info('updateRecipient', JSON.stringify(event));
     const params = JSON.parse(event.body);
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const recipientUpdatedEvent = Events.buildRecipientUpdatedEvent({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId, params });
+    const recipientUpdatedEvent = await Events.buildRecipientUpdatedEvent({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId, params });
     await EventLog.write({ topic: Events.listRecipientUpdated, streamName: process.env.LIST_RECIPIENT_STREAM_NAME, payload: recipientUpdatedEvent });
-    HttpUtils.buildApiResponse({ statusCode: 202, body: { id: event.recipientId } }, callback);
+    HttpUtils.buildApiResponse({ statusCode: 202 }, callback);
   } catch (error) {
     App.logger().error(error);
     HttpUtils.apiErrorHandler(error, callback);
@@ -44,9 +42,9 @@ async function deleteRecipient(event, context, callback) {
     App.configureLogger(event, context);
     App.logger().info('deleteRecipient', JSON.stringify(event));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const recipientDeletedEvent = Events.buildRecipientCreatedEvent({ listId: event.pathParameters.listId, userId: user.id, recipient: event.pathParameters.recipientId });
+    const recipientDeletedEvent = await Events.buildRecipientDeleteEvent({ listId: event.pathParameters.listId, userId: user.id, recipient: event.pathParameters.recipientId });
     await EventLog.write({ topic: Events.listRecipientDeleted, streamName: process.env.LIST_RECIPIENT_STREAM_NAME, payload: recipientDeletedEvent });
-    HttpUtils.buildApiResponse({ statusCode: 202, body: {} }, callback);
+    HttpUtils.buildApiResponse({ statusCode: 202 }, callback);
   } catch (error) {
     App.logger().error(error);
     HttpUtils.apiErrorHandler(error, callback);
@@ -58,27 +56,32 @@ async function listRecipients(event, context, callback) {
     App.configureLogger(event, context);
     App.logger().info('listRecipients', JSON.stringify(event));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const options = event.options || {};
-    // FIXME: try to pass conditions in the query string
-    const conditions = JSON.parse(event.body);
+    const qs = event.queryStringParameters || {}
+    const options = { from: qs.from, size: qs.from };
+    // FIXME: Improve according to:
+    // https://bitbucket.org/micro-apps/monei-core-serverless/src/38856c21a98cacc775cf0518e0d2bd8f488b45e9/node/users/lib/index.js?at=master&fileviewer=file-view-default
+    const conditions = qs.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status', searchTerm: qs.status }, conditionType: 'filter' }] : [];
+    // const conditions = qs.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status.keyword', searchTerm: qs.status }, conditionType: 'filter' }] : [];
+    // const conditions = qs.status ? [{ condition: { queryType: 'terms', fieldToQuery: 'status.keyword', searchTerm: [qs.status] }, conditionType: 'filter' }] : [];
     const recipients = await Recipients.searchRecipientsByListAndConditions(event.pathParameters.listId, conditions, omitEmpty(options));
     HttpUtils.buildApiResponse({ statusCode: 200, body: recipients }, callback);
   } catch (error) {
-    App.logger().error(error);
+    App.logger().error(error, error.stack);
     HttpUtils.apiErrorHandler(error, callback);
   }
 }
-
 
 async function getRecipient(event, context, callback) {
   try {
     App.configureLogger(event, context);
     App.logger().info('getRecipient', JSON.stringify(event));
+    App.logger().info('getRecipient', JSON.stringify(event.pathParameters));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const recipient = await Recipients.getRecipient({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId });
+    // TODO: Handle 404?
+    const recipient = await Recipients.getRecipient({ listId: event.pathParameters.listId, recipientId: event.pathParameters.recipientId });
     HttpUtils.buildApiResponse({ statusCode: 200, body: recipient }, callback);
   } catch (error) {
-    App.logger().error(error);
+    App.logger().error(error, error.stack);
     HttpUtils.apiErrorHandler(error, callback);
   }
 }

@@ -1,3 +1,5 @@
+import omitEmpty from 'omit-empty';
+
 const errors = {
   invalidToken: {
     message: 'Missing or invalid JWT',
@@ -43,13 +45,13 @@ function getApiError(error) {
   return errors.internalServerError;
 }
 
-function buildApiResponse({ statusCode, body }, callback) {
+function buildApiResponse({ statusCode, body = {}, headers = {} }, callback) {
   const response = {
     statusCode,
-    headers: {
+    headers: omitEmpty(Object.assign({}, {
       'Access-Control-Allow-Origin': '*', // Required for CORS support to work
       'Access-Control-Allow-Credentials': true // Required for cookies, authorization headers with HTTPS
-    },
+    }, headers)),
     body: JSON.stringify(body)
   };
   callback(null, response);

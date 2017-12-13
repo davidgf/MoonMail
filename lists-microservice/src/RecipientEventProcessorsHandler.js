@@ -1,3 +1,6 @@
 import RecipientEventProcessors from './RecipientEventProcessors';
 
-module.exports.recipientImportedHandler = RecipientEventProcessors.recipientImportedHandler;
+module.exports.recipientImportedProcessor = RecipientEventProcessors.recipientImportedProcessor;
+module.exports.recipientCreatedProcessor = RecipientEventProcessors.recipientCreatedProcessor;
+module.exports.recipientUpdatedProcessor = RecipientEventProcessors.recipientUpdatedProcessor;
+module.exports.recipientDeletedProcessor = RecipientEventProcessors.recipientDeletedProcessor;

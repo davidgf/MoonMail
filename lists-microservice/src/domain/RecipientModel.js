@@ -17,9 +17,9 @@ export default class RecipientModel extends Recipient {
       email: Joi.string().required().email(),
       subscriptionOrigin: Joi.string().valid(Object.values(RecipientModel.subscriptionOrigins)).required(),
       isConfirmed: Joi.boolean().when('status', { is: RecipientModel.statuses.awaitingConfirmation, then: Joi.only(false).default(false), otherwise: Joi.only(true).default(true) }),
-      status: Joi.string().valid(Object.values(RecipientModel.statuses)).required(),
-      metadata: Joi.object().pattern(/^\S+$/, Joi.any()),
-      systemMetadata: Joi.object().pattern(/^\S+$/, Joi.any())
+      status: Joi.string().valid(RecipientModel.statuses.subscribed, RecipientModel.statuses.awaitingConfirmation).required(),
+      metadata: Joi.object().pattern(/^\S+$/, Joi.required()),
+      systemMetadata: Joi.object().pattern(/^\S+$/, Joi.required())
     });
   }
 
@@ -27,7 +27,7 @@ export default class RecipientModel extends Recipient {
     return Joi.object({
       status: Joi.string().valid(Object.values(RecipientModel.statuses)),
       isConfirmed: Joi.boolean(),
-      metadata: Joi.object().pattern(/\w\d/, Joi.any())
+      metadata: Joi.object().pattern(/^\S+$/, Joi.required())
     });
   }
 

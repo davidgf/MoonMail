@@ -10,7 +10,8 @@ function awsCredentials() {
 
 const ElasticSearch = {
   getDocument(indexName, indexType, id, esClient = null) {
-    const client = Object.assign({}, this.createClient({}), esClient);
+    const client = esClient || this.createClient({});
+    App.logger().debug('ElasticSearch.get', id);
     return client.get({
       index: indexName,
       type: indexType,
@@ -19,7 +20,7 @@ const ElasticSearch = {
   },
 
   deleteDocument(indexName, indexType, id, esClient = null) {
-    const client = Object.assign({}, this.createClient({}), esClient);
+    const client = esClient || this.createClient({});
     return client.delete({
       index: indexName,
       type: indexType,
@@ -28,7 +29,7 @@ const ElasticSearch = {
   },
 
   createOrUpdateDocument(indexName, indexType, id, item, esClient = null) {
-    const client = Object.assign({}, this.createClient({}), esClient);
+    const client = esClient || this.createClient({});
     return client.index({
       index: indexName,
       type: indexType,
@@ -38,7 +39,7 @@ const ElasticSearch = {
   },
 
   search(indexName, indexType, queryBody, esClient = null) {
-    const client = Object.assign({}, this.createClient({}), esClient);
+    const client = esClient || this.createClient({});
     const esQueryRequest = {
       index: indexName,
       type: indexType,
@@ -71,13 +72,13 @@ const ElasticSearch = {
   createClient({ credentials = awsCredentials(), elasticSearchHost = process.env.ES_HOST, elasticSearchRegion = process.env.ES_REGION }) {
     this.esClient = this.client || new Elasticsearch.Client({
       hosts: elasticSearchHost,
-      connectionClass: AWSESConnection,
-      amazonES: {
-        region: elasticSearchRegion,
-        credentials
-      }
+      // connectionClass: AWSESConnection,
+      // amazonES: {
+      //   region: elasticSearchRegion,
+      //   credentials
+      // }
     });
-    return this.client;
+    return this.esClient;
   },
 
   esClient: null

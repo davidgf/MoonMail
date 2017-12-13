@@ -1,0 +1,20 @@
+{
+  "Records": [
+      {
+          "kinesis": {
+              "kinesisSchemaVersion": "1.0",
+              "partitionKey": "lists.recipientCreated",
+              "sequenceNumber": "49579552868828174823032589653974857683153778858260430850",
+              "data": "eyJlcnJvciI6bnVsbCwidmFsdWUiOnsidHlwZSI6Imxpc3RzLnJlY2lwaWVudENyZWF0ZWQiLCJwYXlsb2FkIjp7InJlY2lwaWVudCI6eyJlbWFpbCI6ImNjdmVyYWtAZ21haWwuY29tIiwic3RhdHVzIjoic3Vic2NyaWJlZCIsInN1YnNjcmlwdGlvbk9yaWdpbiI6Im1hbnVhbCIsImxpc3RJZCI6ImNqYjIyaXJkOTAwMDAwMXF4ZjZjYW16YzAiLCJ1c2VySWQiOiJnb29nbGUtb2F1dGgyfDExMzM3MzUzNDA3NjI0MTk4NjcwMSIsImlzQ29uZmlybWVkIjp0cnVlfX19fQ==",
+              "approximateArrivalTimestamp": 1513009823.241
+          },
+          "eventSource": "aws:kinesis",
+          "eventVersion": "1.0",
+          "eventID": "shardId-000000000000:49579552868828174823032589653974857683153778858260430850",
+          "eventName": "aws:kinesis:record",
+          "invokeIdentityArn": "arn:aws:iam::862946620411:role/MoonMail-v2-lists-dev-us-east-1-lambdaRole",
+          "awsRegion": "us-east-1",
+          "eventSourceARN": "arn:aws:kinesis:us-east-1:862946620411:stream/ListEventStream"
+      }
+  ]
+}

@@ -63,7 +63,7 @@
     "lodash": "^4.16.4",
     "mailcomposer": "^3.10.0",
     "moment": "^2.15.1",
-    "moonmail-models": "microapps/moonmail-models",
+    "moonmail-models": "github:microapps/moonmail-models",
     "nodent": "^3.1.0",
     "omit-empty": "^0.4.1",
     "papaparse": "^4.3.6",

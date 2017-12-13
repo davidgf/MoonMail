@@ -34,7 +34,7 @@ const eventSchemas = {
           subscriptionOrigin: Joi.string().valid(Object.values(RecipientModel.subscriptionOrigins)),
           isConfirmed: Joi.boolean().when('status', { is: RecipientModel.statuses.awaitingConfirmation, then: Joi.only(false).default(false), otherwise: Joi.only(true).default(true) }),
           status: Joi.string().valid(RecipientModel.statuses.subscribed, RecipientModel.statuses.awaitingConfirmation).required(),
-          metadata: Joi.object().pattern(/^\S+$/, Joi.any())
+          metadata: Joi.object().pattern(/^\S+$/, Joi.required())
           // systemMetadata: Joi.object().pattern(/^\S+$/, Joi.any())
         }
       }).required()
@@ -50,7 +50,7 @@ const eventSchemas = {
         data: Joi.object({
           status: Joi.string().valid(Object.values(RecipientModel.statuses)),
           isConfirmed: Joi.boolean().when('status', { is: RecipientModel.statuses.awaitingConfirmation, then: Joi.only(false).default(false), otherwise: Joi.only(true).default(true) }),
-          metadata: Joi.object()
+          metadata: Joi.object().pattern(/^\S+$/, Joi.required())
         }).required()
       }).required()
     })
@@ -67,6 +67,8 @@ const eventSchemas = {
   }
 };
 
+const validate = event => Joi.validate(event, eventSchemas[event.type].schema);
+
 const isValid = (event) => {
   try {
     const result = validate(event);
@@ -75,8 +77,6 @@ const isValid = (event) => {
     return false;
   }
 };
-
-const validate = event => Joi.validate(event, eventSchemas[event.type].schema);
 
 function buildRecipientCreatedEvent({ listId, userId, recipient }) {
   return validate({

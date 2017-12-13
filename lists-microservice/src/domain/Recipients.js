@@ -52,21 +52,22 @@ function updateESRecipient(recipient) {
 
 
 function deleteESRecipient(id) {
-  return ElasticSearch.deleteDocument(this.client, this.indexName, this.indexType, id);
+  return ElasticSearch.deleteDocument(client, indexName, indexType, id);
 }
 
-function getRecipient(listId, recipientId) {
-  return ElasticSearch.getDocument(RecipientModel.buildGlobalId(listId, recipientId));
+function getRecipient({ listId, recipientId }) {
+  return ElasticSearch.getDocument(indexName, indexType, RecipientModel.buildGlobalId({ listId, recipientId }))
+    .then(result => result._source);
 }
 
 function searchRecipientsByListAndConditions(listId, conditions, { from = 0, size = 10 }) {
-  return searchRecipientsByConditions([...conditions, ...this.defaultConditions(listId)], { from, size });
+  return searchRecipientsByConditions([...conditions, ...defaultConditions(listId)], { from, size });
 }
 
 function searchRecipientsByConditions(conditions, { from = 0, size = 10 }) {
   return Joi.validate(conditions, conditionsSchema())
     .then(validConditions => ElasticSearch.buildQueryFilters(validConditions).from(from).size(size))
-    .then(query => ElasticSearch.search(this.client, this.indexName, this.indexType, query.build()))
+    .then(query => ElasticSearch.search(indexName, indexType, query.build()))
     .then(esResult => ({ items: esResult.hits.hits.map(hit => hit._source), total: esResult.hits.total }));
 }
 
