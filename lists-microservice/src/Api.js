@@ -28,7 +28,7 @@ async function updateRecipient(event, context, callback) {
     App.logger().info('updateRecipient', JSON.stringify(event));
     const params = JSON.parse(event.body);
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const recipientUpdatedEvent = await Events.buildRecipientUpdatedEvent({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId, params });
+    const recipientUpdatedEvent = await Events.buildRecipientUpdatedEvent({ listId: event.pathParameters.listId, userId: user.id, id: event.pathParameters.recipientId, data: params });
     await EventLog.write({ topic: Events.listRecipientUpdated, streamName: process.env.LIST_RECIPIENT_STREAM_NAME, payload: recipientUpdatedEvent });
     HttpUtils.buildApiResponse({ statusCode: 202 }, callback);
   } catch (error) {

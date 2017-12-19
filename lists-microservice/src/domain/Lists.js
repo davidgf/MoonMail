@@ -113,7 +113,7 @@ function createRecipientsBatch(recipientCreatedEvents) {
 
 function updateRecipientsBatch(recipientUpdatedEvents) {
   return Promise.map(recipientUpdatedEvents, (recipientUpdatedEvent) => {
-    return RecipientModel.update(recipientUpdatedEvent.payload.data, recipientUpdatedEvent.listId, recipientUpdatedEvent.id);
+    return RecipientModel.update(recipientUpdatedEvent.payload.data, recipientUpdatedEvent.payload.listId, recipientUpdatedEvent.payload.id);
   }, { concurrency: 2 });
 }
 

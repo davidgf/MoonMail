@@ -64,3 +64,4 @@ api/lib/models/
 .serverless
 
 **/config.*.json
+lists-microservice/public
