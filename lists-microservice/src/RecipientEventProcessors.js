@@ -56,6 +56,7 @@ function recipientUpdatedProcessor(event, context, callback) {
 
   const recipients = LambdaUtils
     .parseKinesisStreamTopicEvents(event, Events.listRecipientUpdated);
+  App.logger().debug('recipients', JSON.stringify(recipients));
 
   const invalidEvents = recipients.filter(e => !Events.isValid(e));
   if (invalidEvents.length > 0) {
