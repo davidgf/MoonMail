@@ -6,8 +6,8 @@ stage=dev
 region=us-east-1 # must match serverless.yml:provider.region
 apiId=cavsjs2rqk
 profile=MoonMail-v2-lists-dev
-fileType=json
-outputFileName=serverless-aws-documentation-example-$STAGE.$fileType
+fileType=yaml
+outputFileName=api-swagger-$stage.$fileType
 printf "Downloading Swagger definition to ./$outputFileName
   API ID: $apiId
    Stage: $stage

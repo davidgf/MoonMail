@@ -65,6 +65,42 @@ custom:
           name: Recipients
           description: Email recipients
     models:
+      - name: Recipient
+        description: Recipient's model
+        contentType: "application/json"
+        schema:
+          type: object
+          required:
+            - listId
+            - email
+          properties:
+            listId:
+              type: string
+            userId:
+              type: string
+            email:
+              type: string
+            subscriptionOrigin:
+              type: string
+              enum:
+                - signupForm
+                - manual
+                - listImport
+            isConfirmed:
+              type: boolean
+            status:
+              type: string
+              enum:
+                - awaitingConfirmation
+                - subscribed
+            metadata:
+              type: object
+              example:
+                name: Mike
+                surname: MoonMail
+                countryCode: ES
+                whatever: You want
+
       -
         name: CreateRecipient
         description: Recipient's model
@@ -186,9 +222,8 @@ functions:
               description: Recipient create request body
             methodResponses:
               -
-                statusCode: 202
-                responseBody:
-                  description: "Request accepted"
+                statusCode: "202"
+                description: "Request accepted"
                 responseHeaders:
                   -
                     name: Location
@@ -197,9 +232,8 @@ functions:
                 responseModels:
                   "application/json": EmptyResponse
               -
-                statusCode: 422
-                responseBody:
-                  description: "Recipient malformed"
+                statusCode: "422"
+                description: "Recipient malformed"
 
   updateRecipient:
     handler: src/ApiHandler.updateRecipient
