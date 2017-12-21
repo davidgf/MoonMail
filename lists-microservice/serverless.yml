@@ -65,15 +65,21 @@ custom:
           name: Recipients
           description: Email recipients
     models:
-      - name: Recipient
+      -
+        name: Recipient
         description: Recipient's model
         contentType: "application/json"
         schema:
           type: object
           required:
+            - id
             - listId
+            - userId
             - email
+            - status
           properties:
+            id:
+              type: string
             listId:
               type: string
             userId:
@@ -95,31 +101,78 @@ custom:
                 - subscribed
             metadata:
               type: object
-              example:
-                name: Mike
-                surname: MoonMail
-                countryCode: ES
-                whatever: You want
-
       -
-        name: CreateRecipient
+        name: RecipientsList
+        description: A list of recipients
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "{{model: Recipient}}"
+      -
+        name: NewRecipient
+        description: New recipient
+        contentType: "application/json"
+        schema:
+          type: object
+          required:
+            - email
+            - subscriptionOrigin
+            - status
+          properties:
+            email:
+              type: string
+              format: email
+            subscriptionOrigin:
+              enum:
+                - signupForm
+                - listImport
+                - manual
+              type: string
+            status:
+              enum:
+                - subscribed
+                - awaitingConfirmation
+              type: string
+            isConfirmed:
+              type: boolean
+            metadata:
+              type: object
+              properties: {}
+              additionalProperties: true
+      -
+        name: CreateRecipientRequest
         description: Recipient's model
         contentType: "application/json"
         schema:
           type: object
           properties:
             recipient:
+              $ref: "{{model: NewRecipient}}"
+      -
+        name: UpdateRecipientRequest
+        description: Recipient updates model
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            status:
+              enum:
+                - subscribed
+                - awaitingConfirmation
+                - unsubscribed
+              type: string
+            isConfirmed:
+              type: boolean
+            metadata:
               type: object
-              properties:
-                email:
-                  type: string
-                metadata:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    surname:
-                      type: string
+              properties: {}
+              additionalProperties: true
+          additionalProperties: false
+
       -
         name: EmptyResponse
         description: Empty response
@@ -217,7 +270,7 @@ functions:
                 description: The ID of the list the recipient belongs to
                 required: true
             requestModels:
-              "application/json": CreateRecipient
+              "application/json": CreateRecipientRequest
             requestBody:
               description: Recipient create request body
             methodResponses:
@@ -263,7 +316,7 @@ functions:
                 name: recipientId
                 description: The ID of the recipient
             requestModels:
-              "application/json": CreateRecipient
+              "application/json": UpdateRecipientRequest
             requestBody:
               description: Recipient update request body
 
@@ -322,6 +375,12 @@ functions:
               -
                 name: recipientId
                 description: The ID of the recipient
+            methodResponses:
+              -
+                statusCode: "200"
+                description: "OK"
+                responseModels:
+                  "application/json": Recipient
 
   listRecipients:
     handler: src/ApiHandler.listRecipients
@@ -350,6 +409,12 @@ functions:
                 name: listId
                 description: The ID of the list the recipient belongs to
                 required: true
+            methodResponses:
+              -
+                statusCode: "200"
+                description: "OK"
+                responseModels:
+                  "application/json": RecipientsList
 
 resources:
   Resources:
