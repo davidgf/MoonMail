@@ -56,8 +56,10 @@ async function listRecipients(event, context, callback) {
     App.configureLogger(event, context);
     App.logger().info('listRecipients', JSON.stringify(event));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    const qs = event.queryStringParameters || {}
-    const options = { from: qs.from, size: qs.from };
+    const qs = event.queryStringParameters || {};
+    const page = qs.page || 1;
+    const limit = qs.limit || 10;
+    const options = { from: (page - 1) * limit, size: Math.min(limit, 100) };
     // FIXME: Improve according to:
     // https://bitbucket.org/micro-apps/monei-core-serverless/src/38856c21a98cacc775cf0518e0d2bd8f488b45e9/node/users/lib/index.js?at=master&fileviewer=file-view-default
     const conditions = qs.status ? [{ condition: { queryType: 'match', fieldToQuery: 'status', searchTerm: qs.status }, conditionType: 'filter' }] : [];

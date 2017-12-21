@@ -53,8 +53,12 @@ custom:
         version: '2'
         title: MoonMail API
         description: >
-          Welcome to the MoonMail API reference. All requests are authenticated using an
-          `api-key` which can be obtained from your developer dashboard.
+          Welcome to the MoonMail API reference, which lets you easily inject, repair and burn
+          off recipients and metafields from your space.
+
+          The MoonMail API is organized around the REST methodology. It uses resource-oriented
+          URLs, and common HTTP response codes to indicate API errors. All requests are
+          authenticated using an `api-key` which can be obtained from your developer dashboard.
         termsOfService: http://support.moonmail.io/terms-and-policies/terms-of-service
         contact:
           name: MoonMail
@@ -112,6 +116,9 @@ custom:
               type: array
               items:
                 $ref: "{{model: Recipient}}"
+            total:
+              type: integer
+              description: Count of the recipients contained in the list
       -
         name: NewRecipient
         description: New recipient
@@ -172,13 +179,22 @@ custom:
               properties: {}
               additionalProperties: true
           additionalProperties: false
-
       -
         name: EmptyResponse
         description: Empty response
         contentType: "application/json"
         schema:
           type: object
+      - name: RecipientMalformed
+        description: Malformed recipient error
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            message:
+              type: string
 
 package:
   individually: true
@@ -282,11 +298,11 @@ functions:
                     name: Location
                     description: Path of the newly created recipient
                     type: string
-                responseModels:
-                  "application/json": EmptyResponse
               -
                 statusCode: "422"
                 description: "Recipient malformed"
+                responseModels:
+                  "application/json": RecipientMalformed
 
   updateRecipient:
     handler: src/ApiHandler.updateRecipient
@@ -319,6 +335,15 @@ functions:
               "application/json": UpdateRecipientRequest
             requestBody:
               description: Recipient update request body
+            methodResponses:
+              -
+                statusCode: "202"
+                description: "Request accepted"
+              -
+                statusCode: "422"
+                description: "Recipient malformed"
+                responseModels:
+                  "application/json": RecipientMalformed
 
   # deleteRecipient:
   #   handler: src/ApiHandler.deleteRecipient
@@ -381,6 +406,9 @@ functions:
                 description: "OK"
                 responseModels:
                   "application/json": Recipient
+              -
+                statusCode: "404"
+                description: "Recipient not found"
 
   listRecipients:
     handler: src/ApiHandler.listRecipients
@@ -409,6 +437,13 @@ functions:
                 name: listId
                 description: The ID of the list the recipient belongs to
                 required: true
+            queryParams:
+              -
+                name: page
+                description: "Page to show (default: 1)"
+              -
+                name: limit
+                description: "Amount of results (default: 10; maximum: 100)"
             methodResponses:
               -
                 statusCode: "200"
