@@ -320,33 +320,33 @@ functions:
             requestBody:
               description: Recipient update request body
 
-  deleteRecipient:
-    handler: src/ApiHandler.deleteRecipient
-    name: ${self:custom.resourcesPrefix}-deleteRecipient
-    events:
-      - http:
-          path: /lists/{listId}/recipients/{recipientId}
-          method: delete
-          private: true
-          request:
-            parameters:
-              paths:
-                listId: true
-                recipientId: true
-          documentation:
-            summary: Deletes a recipient
-            tags:
-              - Recipients
-            description: >
-              Gets a single recipient of the specified list.
-            pathParams:
-              -
-                name: listId
-                description: The ID of the list the recipient belongs to
-                required: true
-              -
-                name: recipientId
-                description: The ID of the recipient
+  # deleteRecipient:
+  #   handler: src/ApiHandler.deleteRecipient
+  #   name: ${self:custom.resourcesPrefix}-deleteRecipient
+  #   events:
+  #     - http:
+  #         path: /lists/{listId}/recipients/{recipientId}
+  #         method: delete
+  #         private: true
+  #         request:
+  #           parameters:
+  #             paths:
+  #               listId: true
+  #               recipientId: true
+  #         documentation:
+  #           summary: Deletes a recipient
+  #           tags:
+  #             - Recipients
+  #           description: >
+  #             Gets a single recipient of the specified list.
+  #           pathParams:
+  #             -
+  #               name: listId
+  #               description: The ID of the list the recipient belongs to
+  #               required: true
+  #             -
+  #               name: recipientId
+  #               description: The ID of the recipient
 
   getRecipient:
     handler: src/ApiHandler.getRecipient
