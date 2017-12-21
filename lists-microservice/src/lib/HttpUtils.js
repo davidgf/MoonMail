@@ -2,43 +2,50 @@ import omitEmpty from 'omit-empty';
 
 const errors = {
   invalidToken: {
-    message: 'Missing or invalid JWT',
+    body: { message: 'Missing or invalid JWT' },
     statusCode: 401
   },
   invalidApiKey: {
-    message: 'Invalid API Key',
+    body: { message: 'Invalid API Key' },
     statusCode: 401
   },
   missingParameters: {
-    message: 'Missing parameters',
+    body: { message: 'Missing parameters' },
     statusCode: 400
   },
   notAuthorized: {
-    message: 'You are not authorized to perform this action',
+    body: { message: 'You are not authorized to perform this action' },
     statusCode: 403
   },
+  notFound: {
+    body: { message: 'Resource not found' },
+    statusCode: 404
+  },
   internalServerError: {
-    message: 'Internal Server Error',
+    body: { message: 'Internal Server Error' },
     statusCode: 500
   },
   serviceUnavailable: {
-    message: 'Upstream service unavailable',
+    body: { message: 'Upstream service unavailable' },
     statusCode: 503
   }
 };
 
 function apiErrorHandler(err, fn) {
   const apiError = getApiError(err);
-  return fn(null, apiError);
+  const apiGatewayError = Object.assign({}, apiError, { body: JSON.stringify(apiError.body) });
+  return fn(null, apiGatewayError);
 }
 
 function getApiError(error) {
   if (error.message === 'invalid token' || error.message === 'jwt expired') return errors.invalidToken;
   if (error.message === 'Missing required parameters') return errors.missingParameters;
+  if (error.statusCode === 404 || error.displayName === 'NotFound') return errors.notFound;
   if (error.message.match(/apiKey/)) return errors.notAuthorized;
   if (error.isJoi) {
+    const errorMessages = error.details.map(e => e.message);
     return {
-      message: Object.assign({}, { name: error.name, details: error.details }),
+      body: { name: error.name, message: errorMessages.join(';') },
       statusCode: 422
     };
   }

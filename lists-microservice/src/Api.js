@@ -77,7 +77,6 @@ async function getRecipient(event, context, callback) {
     App.logger().info('getRecipient', JSON.stringify(event));
     App.logger().info('getRecipient', JSON.stringify(event.pathParameters));
     const user = await UserContext.byApiKey(event.requestContext.identity.apiKey);
-    // TODO: Handle 404?
     const recipient = await Recipients.getRecipient({ listId: event.pathParameters.listId, recipientId: event.pathParameters.recipientId });
     HttpUtils.buildApiResponse({ statusCode: 200, body: recipient }, callback);
   } catch (error) {
