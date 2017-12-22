@@ -46,6 +46,7 @@
             "$${sesStatementTemplate}",
             "$${kinesisStatementTemplate}",
             "$${iotStatementTemplate}",
+            "$${apiGatewayStatementTemplate}",
             {
               "Effect": "Allow",
               "Action": [
@@ -650,6 +651,10 @@
             "AttributeType": "S"
           },
           {
+            "AttributeName": "apiKey",
+            "AttributeType": "S"
+          },
+          {
             "AttributeName": "amazonCustomerId",
             "AttributeType": "S"
           }
@@ -665,6 +670,18 @@
             "IndexName" : "$${usersEmailIndex}",
             "KeySchema" : [{
               "AttributeName": "email",
+              "KeyType": "HASH"
+            }],
+            "Projection" : {"ProjectionType": "ALL"},
+            "ProvisionedThroughput" : {
+              "ReadCapacityUnits": "${defaultRCU}",
+              "WriteCapacityUnits": "${defaultWCU}"
+            }
+          },
+          {
+            "IndexName" : "$${usersApiKeyIndex}",
+            "KeySchema" : [{
+              "AttributeName": "apiKey",
               "KeyType": "HASH"
             }],
             "Projection" : {"ProjectionType": "ALL"},
