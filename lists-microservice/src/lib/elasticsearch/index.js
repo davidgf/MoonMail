@@ -72,11 +72,11 @@ const ElasticSearch = {
   createClient({ credentials = awsCredentials(), elasticSearchHost = process.env.ES_HOST, elasticSearchRegion = process.env.ES_REGION }) {
     this.esClient = this.client || new Elasticsearch.Client({
       hosts: elasticSearchHost,
-      // connectionClass: AWSESConnection,
-      // amazonES: {
-      //   region: elasticSearchRegion,
-      //   credentials
-      // }
+      connectionClass: AWSESConnection,
+      amazonES: {
+        region: elasticSearchRegion,
+        credentials
+      }
     });
     return this.esClient;
   },
