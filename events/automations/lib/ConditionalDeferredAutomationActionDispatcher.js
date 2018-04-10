@@ -9,4 +9,3 @@ export default class ConditionalDeferredAutomationActionDispatcher extends Autom
     return Promise.resolve('Temporary stub');
   }
 }
-

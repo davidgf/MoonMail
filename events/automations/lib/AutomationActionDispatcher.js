@@ -12,6 +12,10 @@ export default class AutomationActionDispatcher {
     return process.env.FETCH_SENDER_FN_NAME;
   }
 
+  get dispatchableEmails() {
+    return this.events;
+  }
+
   constructor(automationAction, events) {
     this.automationAction = automationAction;
     this.events = events;
@@ -23,7 +27,7 @@ export default class AutomationActionDispatcher {
   }
 
   buildEmails(sender) {
-    return Promise.map(this.events, event => this.fetchEventRecipient(event.payload)
+    return Promise.map(this.dispatchableEmails, event => this.fetchEventRecipient(event.payload)
       .then(recipient => this.buildEmail(sender, recipient, event.payload)));
   }
 

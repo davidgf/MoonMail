@@ -1,4 +1,5 @@
 import AutomationActionDispatcher from './AutomationActionDispatcher';
+import EmailScheduler from './email_scheduler';
 
 export default class ConditionalAutomationActionDispatcher extends AutomationActionDispatcher {
   constructor(automationAction = {}, events = []) {
@@ -6,6 +7,8 @@ export default class ConditionalAutomationActionDispatcher extends AutomationAct
   }
 
   dispatch() {
-    return Promise.resolve('Temporary stub');
+    return this.fetchAutomationSender()
+      .then(sender => this.buildEmails(sender))
+      .then(emails => EmailScheduler.scheduleBatch(emails));
   }
 }
