@@ -38,8 +38,8 @@ describe('ConditionalAutomationActionDispatcher', () => {
       sinon.stub(AutomationActionDispatcher.prototype, 'fetchAutomationSender').resolves(sender);
       sinon.stub(EmailScheduler, 'scheduleBatch').resolves(true);
       sinon.stub(ConditionsEvaluator, 'areMet')
-        .withArgs(automationAction, firstEvent).resolves(true)
-        .withArgs(automationAction, secondEvent).resolves(false);
+        .withArgs(automationAction.conditions, firstEvent).resolves(true)
+        .withArgs(automationAction.conditions, secondEvent).resolves(false);
     });
     afterEach(() => {
       AutomationActionDispatcher.prototype.fetchAutomationSender.restore();

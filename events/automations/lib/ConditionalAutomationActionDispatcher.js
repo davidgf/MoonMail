@@ -8,7 +8,7 @@ export default class ConditionalAutomationActionDispatcher extends AutomationAct
   }
 
   getDispatchableEvents() {
-    return Promise.filter(this.events, evt => ConditionsEvaluator.areMet(this.automationAction, evt));
+    return Promise.filter(this.events, evt => ConditionsEvaluator.areMet(this.automationAction.conditions, evt));
   }
 
   dispatch() {
