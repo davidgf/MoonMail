@@ -80,10 +80,11 @@ describe('AutomationActionDispatcher', () => {
     });
   });
 
-  describe('#dispatchableEmails', () => {
-    it('returns all events', () => {
+  describe('#getDispatchableEvents', () => {
+    it('resolves all events', async () => {
       const dispatcher = new AutomationActionDispatcher(automationAction, events);
-      expect(dispatcher.dispatchableEmails).to.deep.equal(events);
+      const result = await dispatcher.getDispatchableEvents();
+      expect(result).to.deep.equal(events);
     });
   });
 
