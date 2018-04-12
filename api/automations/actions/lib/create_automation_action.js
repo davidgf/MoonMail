@@ -47,7 +47,7 @@ class NotOpenedAutomationActionFactory {
       resource: 'recipient.activity',
       filters: [
         { campaignId: { eq: id } },
-        { eventType: { eq: 'email.opened' } }
+        { type: { eq: 'email.opened' } }
       ],
       count: 0,
       delay: this.automationAction.delay

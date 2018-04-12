@@ -2,8 +2,6 @@ import chai from 'chai';
 import sinon from 'sinon';
 import 'sinon-as-promised';
 import sinonChai from 'sinon-chai';
-import faker from 'faker';
-import R from 'ramda';
 import ConditionsEvaluator from './ConditionsEvaluator';
 
 const { expect } = chai;

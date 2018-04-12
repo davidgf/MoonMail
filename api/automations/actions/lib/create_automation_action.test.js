@@ -118,7 +118,7 @@ describe('CreateAutomationAction', () => {
                   resource: 'recipient.activity',
                   filters: [
                     { campaignId: { eq: sinon.match.string } },
-                    { eventType: { eq: 'email.opened' } }
+                    { type: { eq: 'email.opened' } }
                   ],
                   count: 0,
                   delay: 300
